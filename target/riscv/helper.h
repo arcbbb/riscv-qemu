@@ -76,3 +76,4 @@ DEF_HELPER_2(mret, tl, env, tl)
 DEF_HELPER_1(wfi, void, env)
 DEF_HELPER_1(tlb_flush, void, env)
 #endif
+DEF_HELPER_1(dump_pc, void, i32)

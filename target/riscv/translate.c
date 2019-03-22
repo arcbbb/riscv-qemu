@@ -2055,12 +2055,32 @@ static bool riscv_tr_breakpoint_check(DisasContextBase *dcbase, CPUState *cpu,
     return true;
 }
 
+void helper_dump_pc(unsigned int pc) {
+   static FILE *pc_file = NULL;
+   static unsigned int last_pc = 0;
+   if (pc_file == NULL) {
+       pc_file = fopen("qemu.pc", "w");
+   }
+   if (pc_file) {
+       if (pc != last_pc)
+           fprintf(pc_file, "0x%x\n", pc);
+       last_pc = pc;
+   }
+}
+
 static void riscv_tr_translate_insn(DisasContextBase *dcbase, CPUState *cpu)
 {
     DisasContext *ctx = container_of(dcbase, DisasContext, base);
     CPURISCVState *env = cpu->env_ptr;
 
     ctx->opcode = cpu_ldl_code(env, ctx->base.pc_next);
+    {
+        TCGv const1;
+
+        const1 = tcg_const_i32(ctx->base.pc_next);
+        gen_helper_dump_pc(const1);
+        tcg_temp_free(const1);
+    }
     decode_opc(ctx);
     ctx->base.pc_next = ctx->pc_succ_insn;
 
